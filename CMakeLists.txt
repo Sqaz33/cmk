@@ -1,42 +1,20 @@
 cmake_minimum_required(VERSION 3.15 FATAL_ERROR)
 
-project(hi)
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 
-option(USE_STATIC "Use static lib" OFF)
-message(STATUS "Lib ${USE_STATIC}")
+project(hi LANGUAGES CXX)
 
 
-add_library(message-objs
-    OBJECT
-    lib/hi.cpp
-    lib/hi.hpp
-)
+if(WIN32)
+    set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
+endif()
+
+include_directories(lib)
 
 add_executable(main main.cpp)
 
-if(WIN32)
-    target_compile_options(message-objs
-        PRIVATE
-            -Wall
-    )
-    set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
-else()
-    target_compile_options(message-objs
-    PRIVATE
-        -Wall -fpic
-    )
-endif()
+add_subdirectory(lib)
 
-if(USE_STATIC)
-    add_library(message-a
-        STATIC
-            $<TARGET_OBJECTS:message-objs>
-    )
-    target_link_libraries(main message-a)
-else()
-    add_library(message-so
-        SHARED
-            $<TARGET_OBJECTS:message-objs>
-    )
-    target_link_libraries(main message-so)
-endif()
+target_link_libraries(main PUBLIC hi_lib)
+
